@@ -6,8 +6,18 @@ This plugin contains:
 - An specialized UPaperZDAnimSequence_Spine2D that interfaces with Spine2D and knows how to updates its playback.
 - A ready to use APaperZDCharacter_Spine2D that pre-configures PaperZD's AnimPlayer, registering the Spine2D sequences to the intended RenderComponent.
 
-Instructions:
-------------
+Install:
+--------
+
+For installing this plugin, copy the folder **PaperZDForSpine2D** into your project plugins folder (creating it if it doesn't exist).
+Path should look like this
+`MyProject/Plugins/PaperZDForSpine2D`
+
+After that, you should be able to run your project and it will prompt a build which you should accept.
+After that you can start freely using this plugin.
+
+Advanced Instructions:
+---------------------
 
 For use of external animation sources for PaperZD first you need to have an inherited class from UPaperZDAnimSequence, this fork already gives one already configured class.
 
