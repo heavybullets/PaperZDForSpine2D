@@ -16,7 +16,7 @@
 	"Modules": [
 		{
 			"Name": "PaperZDForSpine2D",
-			"Type": "Developer",
+			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}
 	],
