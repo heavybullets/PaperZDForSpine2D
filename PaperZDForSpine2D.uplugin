@@ -1,0 +1,33 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "PaperZDForSpine2D",
+	"Description": "PaperZD Support for Spine2D",
+	"Category": "Other",
+	"CreatedBy": "CriticalFailure Studio",
+	"CreatedByURL": "http://www.criticalfailure-studio.com",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "PaperZDForSpine2D",
+			"Type": "Developer",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "PaperZD",
+			"Enabled": true
+		},
+		{
+			"Name": "SpinePlugin",
+			"Enabled": true
+		}
+	]
+}

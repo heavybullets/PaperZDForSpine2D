@@ -1,0 +1,10 @@
+#Mage
+Binaries/
+Build/
+Debug/
+Intermediate/
+Saved/
+
+#common
+.vs/
+.git
