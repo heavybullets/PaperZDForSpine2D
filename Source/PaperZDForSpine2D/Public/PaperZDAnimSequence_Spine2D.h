@@ -47,10 +47,11 @@ public:
 	void PostLoad() override;
 	
 	//Required methods
-	virtual void UpdateRenderPlayback(class UPrimitiveComponent* RenderComponent, const float Time) const override;
+	virtual void BeginSequencePlayback(class UPrimitiveComponent* RenderComponent, bool bLooping, bool bIsPreviewPlayback = false) const override;
+	virtual void UpdateRenderPlayback(class UPrimitiveComponent* RenderComponent, const float Time, bool bLooping, bool bIsPreviewPlayback = false) const override;
 	virtual float GetTotalDuration() const override;
 	virtual TSubclassOf<UPrimitiveComponent> GetRenderComponentClass() const override;
-	virtual void ConfigureRenderComponent(class UPrimitiveComponent* RenderComponent) const override;
+	virtual void ConfigureRenderComponent(class UPrimitiveComponent* RenderComponent, bool bIsPreviewPlayback = false) const override;
 	
 #if WITH_EDITOR
 	void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
