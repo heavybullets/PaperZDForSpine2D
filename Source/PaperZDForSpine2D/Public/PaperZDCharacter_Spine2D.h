@@ -18,6 +18,9 @@ class PAPERZDFORSPINE2D_API APaperZDCharacter_Spine2D : public APaperZDCharacter
 	UPROPERTY(VisibleAnywhere, Category = "Spine2D")
 	USpineSkeletonRendererComponent* SpineRenderer;
 
+	UPROPERTY(VisibleAnywhere, Category = "Spine2D")
+	USpineSkeletonAnimationComponent* AnimationComponent;
+
 public:
 	APaperZDCharacter_Spine2D();
 
