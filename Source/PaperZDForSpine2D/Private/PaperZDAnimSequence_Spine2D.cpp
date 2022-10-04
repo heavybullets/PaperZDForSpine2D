@@ -1,136 +1,71 @@
-// Copyright 2017-2019 CriticalFailure Studio.
+// Copyright 2017-2022 CriticalFailure Studio.
 
 #include "PaperZDAnimSequence_Spine2D.h"
-#include "SpineSkeletonRendererComponent.h"
-#include "SpineSkeletonAnimationComponent.h"
-#include "SpineAtlasAsset.h"
-
-UPaperZDAnimSequence_Spine2D::UPaperZDAnimSequence_Spine2D() : Super()
-{
-#if WITH_EDITOR
-	//Preview scene needed AnimationComponent
-	AnimationComponent = CreateDefaultSubobject<USpineSkeletonAnimationComponent>(TEXT("PreviewAnimationComponent"), true);
-	AnimationComponent->SetAutoPlay(false);
-#endif
-}
+#include "PaperZDAnimationSource_Spine2D.h"
+#include "PaperZDForSpine2DCustomVersion.h"
 
 void UPaperZDAnimSequence_Spine2D::PostLoad()
 {
 	Super::PostLoad();
 
-	if (Atlas && SkeletonDataAsset)
+	//Backwards compatibility: after the AnimBlueprint rework, the AnimSequences now can support "multi-directional" data sources
+	//which are stored on an array that accommodates its size to the number of directions it needs to use.
+	//A non-directional sequence uses a size-1 array, thus we need to move the data from the old non-directional variable into the array.
+	//The resulting AnimSequence will be non-directional due to the old version having no directional support whatsoever.
+	const int32 ZDVersion = GetLinkerCustomVersion(FPaperZDForSpine2DCustomVersion::GUID);
+	if (ZDVersion < FPaperZDForSpine2DCustomVersion::AddedDirectionalSequenceSupport)
 	{
-		UpdateAnimationData();
+		AnimDataSource.SetNum(1);
+		AnimDataSource[0] = AnimationName_DEPRECATED.ToString();
+		bDirectionalSequence = false;
 	}
 }
 
-#if WITH_EDITOR
-void UPaperZDAnimSequence_Spine2D::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
+void UPaperZDAnimSequence_Spine2D::Serialize(FArchive& Ar)
 {
-	Super::PostEditChangeProperty(PropertyChangedEvent);
-
-	if (PropertyChangedEvent.GetPropertyName() == TEXT("Atlas") || PropertyChangedEvent.GetPropertyName() == TEXT("SkeletonDataAsset"))
-	{
-		UpdateAnimationData();
-	}
-	else if (PropertyChangedEvent.GetPropertyName() == TEXT("AnimationName"))
-	{
-		//No need to update the skeleton if only the animation changes
-		if (SkeletonData)
-		{
-			CachedAnimation = SkeletonData->findAnimation(TCHAR_TO_UTF8(*AnimationName.ToString()));
-		}
-	}
-}
-#endif
-
-void UPaperZDAnimSequence_Spine2D::UpdateAnimationData()
-{
-	//Regenerate data
-	if (Atlas && SkeletonDataAsset)
-	{
-		SkeletonData = SkeletonDataAsset->GetSkeletonData(Atlas->GetAtlas());
-
-		if (SkeletonData && !AnimationName.IsNone())
-		{
-			CachedAnimation = SkeletonData->findAnimation(TCHAR_TO_UTF8(*AnimationName.ToString()));
-		}
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////
-//// Required sequence methods
-//////////////////////////////////////////////////////////////////////////
-void UPaperZDAnimSequence_Spine2D::BeginSequencePlayback(class UPrimitiveComponent* RenderComponent, bool bLooping, bool bIsPreviewPlayback /* = false */) const
-{
-	USpineSkeletonRendererComponent* SpineRender = Cast<USpineSkeletonRendererComponent>(RenderComponent);
-	if (SpineRender && CachedAnimation)
-	{
-		AActor* Owner = RenderComponent->GetOwner();
-		USpineSkeletonAnimationComponent* SkeletonComponent = Owner ? Owner->FindComponentByClass<USpineSkeletonAnimationComponent>() : AnimationComponent;
-		if (SkeletonComponent)
-		{
-			SkeletonComponent->Atlas = Atlas;
-			SkeletonComponent->SkeletonData = SkeletonDataAsset;
-			SkeletonComponent->AddAnimation(0, AnimationName.ToString(), bLooping, 0.0f);
-			SkeletonComponent->SetAutoPlay(!bIsPreviewPlayback);
-		}
-	}
-}
-
-void UPaperZDAnimSequence_Spine2D::UpdateRenderPlayback(class UPrimitiveComponent* RenderComponent, const float Time, bool bIsPreviewPlayback /* = false */) const
-{
-	USpineSkeletonRendererComponent* SpineRender = Cast<USpineSkeletonRendererComponent>(RenderComponent);
-	if (SpineRender && CachedAnimation)
-	{
-		AActor* Owner = RenderComponent->GetOwner();
-		USpineSkeletonAnimationComponent* SkeletonComponent = Owner ? Owner->FindComponentByClass<USpineSkeletonAnimationComponent>() : AnimationComponent;
-		if (SkeletonComponent)
-		{
-			SkeletonComponent->Atlas = Atlas;
-			SkeletonComponent->SkeletonData = SkeletonDataAsset;
-
-			//Preview playback has some extra steps
-			if (bIsPreviewPlayback)
-			{
-#if WITH_EDITOR
-				//When on editor, we can change the animation data after being inited, we must be able to respond to those changes which don't happen on runtime
-				spine::AnimationState* State = SkeletonComponent->GetAnimationState();
-				if (State)
-				{
-					if (State->getCurrent(0) == nullptr || State->getCurrent(0)->getAnimation()->getName() != CachedAnimation->getName())
-					{
-						if (State->getCurrent(0))
-						{
-							const FString str1 = FString(UTF8_TO_TCHAR(State->getCurrent(0)->getAnimation()->getName().buffer()));;
-							const FString str2 = FString(UTF8_TO_TCHAR(CachedAnimation->getName().buffer()));;
-						}
-
-						State->clearTracks();
-						State->addAnimation(0, CachedAnimation, true, 0.0f);
-					}
-				}
-#endif
-
-				SpineRender->UpdateRenderer(SkeletonComponent);
-				SkeletonComponent->SetPlaybackTime(Time);
-			}
-
-		}
-	}
+	Super::Serialize(Ar);
+	Ar.UsingCustomVersion(FPaperZDForSpine2DCustomVersion::GUID);
 }
 
 float UPaperZDAnimSequence_Spine2D::GetTotalDuration() const
 {
-	return CachedAnimation ? CachedAnimation->getDuration() : 0.0f;
+	//Animation data available inside the source
+	UPaperZDAnimationSource_Spine2D* SpineSource = Cast<UPaperZDAnimationSource_Spine2D>(GetAnimSource());
+	if (SpineSource && AnimDataSource.Num())
+	{
+		//Try to find this animation, if it exists (edge cases could be that we changed the source data or haven't setup the data correctly)
+		const FString& PrimaryAnimationName = AnimDataSource[0];
+		spine::Animation* AnimationData = SpineSource->FindAnimation(PrimaryAnimationName);
+		if (AnimationData)
+		{
+			return AnimationData->getDuration();
+		}
+	}
+
+	return 0.0f;
 }
 
-TSubclassOf<UPrimitiveComponent> UPaperZDAnimSequence_Spine2D::GetRenderComponentClass() const
+float UPaperZDAnimSequence_Spine2D::GetFramesPerSecond() const
 {
-	return USpineSkeletonRendererComponent::StaticClass();
+	//Default value is 15 fps
+	return 15.0f;
 }
 
-void UPaperZDAnimSequence_Spine2D::ConfigureRenderComponent(class UPrimitiveComponent* RenderComponent, bool bIsPreviewPlayback /* = false */) const
+bool UPaperZDAnimSequence_Spine2D::IsDataSourceEntrySet(int32 EntryIndex) const
 {
-	//Extra initialization global to the AnimSequence goes here
+	return AnimDataSource.IsValidIndex(EntryIndex) ? !AnimDataSource[EntryIndex].IsEmpty() : false;
+}
+
+TArray<FString> UPaperZDAnimSequence_Spine2D::GetAvailableAnimationNames() const
+{
+	TArray<FString> AnimationNames;
+
+	//Animation data available inside the source
+	UPaperZDAnimationSource_Spine2D* SpineSource = Cast<UPaperZDAnimationSource_Spine2D>(GetAnimSource());
+	if (SpineSource)
+	{
+		SpineSource->GetAnimationNames(AnimationNames);
+	}
+
+	return AnimationNames;
 }

@@ -7,6 +7,8 @@
 #include "PaperZDCharacter_Spine2D.generated.h"
 
 class USpineSkeletonRendererComponent;
+class USpineSkeletonAnimationComponent;
+
 /**
  * Specialized character that manages Spine2D AnimSequence configuration
  */
@@ -19,12 +21,9 @@ class PAPERZDFORSPINE2D_API APaperZDCharacter_Spine2D : public APaperZDCharacter
 	USpineSkeletonRendererComponent* SpineRenderer;
 
 	UPROPERTY(VisibleAnywhere, Category = "Spine2D")
-	USpineSkeletonAnimationComponent* AnimationComponent;
+	USpineSkeletonAnimationComponent* SpineAnimationComponent;
 
 public:
 	APaperZDCharacter_Spine2D();
-
-	//Required methods for initialization
-	virtual void ConfigurePlayer_Implementation(UPaperZDAnimPlayer* Player);
 	   	
 };

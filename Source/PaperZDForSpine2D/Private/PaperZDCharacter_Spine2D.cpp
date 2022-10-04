@@ -11,14 +11,6 @@ APaperZDCharacter_Spine2D::APaperZDCharacter_Spine2D() : Super()
 	SpineRenderer = CreateDefaultSubobject<USpineSkeletonRendererComponent>(TEXT("SpineRenderer"));
 	SpineRenderer->SetupAttachment(RootComponent);
 
-	AnimationComponent = CreateDefaultSubobject<USpineSkeletonAnimationComponent>(TEXT("SkeletonAnimation"));
-}
-
-void APaperZDCharacter_Spine2D::ConfigurePlayer_Implementation(UPaperZDAnimPlayer* Player)
-{
-	Super::ConfigurePlayer_Implementation(Player);
-
-	//Need to register the sequence with our intended spine renderer
-	Player->RegisterRenderComponent(UPaperZDAnimSequence_Spine2D::StaticClass(), SpineRenderer);
+	SpineAnimationComponent = CreateDefaultSubobject<USpineSkeletonAnimationComponent>(TEXT("SkeletonAnimation"));
 }
 

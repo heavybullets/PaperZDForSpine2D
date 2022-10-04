@@ -1,15 +1,11 @@
-// Copyright 2017-2019 CriticalFailure Studio.
+// Copyright 2017-2022 CriticalFailure Studio.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "AnimSequences/PaperZDAnimSequence.h"
-#include "spine/spine.h"
 #include "PaperZDAnimSequence_Spine2D.generated.h"
 
-class USpineAtlasAsset;
-class USpineSkeletonDataAsset;
-class USpineSkeletonAnimationComponent;
 /**
  * Specialized AnimSequence class that gives Spine2D support to PaperZD.
  */
@@ -18,46 +14,29 @@ class PAPERZDFORSPINE2D_API UPaperZDAnimSequence_Spine2D : public UPaperZDAnimSe
 {
 	GENERATED_BODY()
 
-private:
-	UPROPERTY(EditAnywhere, Category = "Animation")
-	USpineAtlasAsset* Atlas;
+	//@DEPRECATED: In favor of the animation data source which now can support multi-directional animations.
+	UPROPERTY()
+	FName AnimationName_DEPRECATED;
 
-	UPROPERTY(EditAnywhere, Category = "Animation")
-	USpineSkeletonDataAsset* SkeletonDataAsset;
-
-	UPROPERTY(EditAnywhere, Category = "Animation")
-	FName AnimationName;
-
-	/* Holds Spine2D skeletal animation data */
-	spine::SkeletonData* SkeletonData;
-
-	/* Holds the cached Animation data from the skeleton, is managed by the skeleton */
-	spine::Animation* CachedAnimation;
-
-#if WITH_EDITOR
-	/* Used for Preview scene viewport updating, as the Renderer won't have an owner nor an AnimationComponent, we must provide the latter. */
-	UPROPERTY(Transient)
-	USpineSkeletonAnimationComponent* AnimationComponent;
-#endif
-
+	/* Contains the render information for displaying the animation, multi-directional. */
+	UPROPERTY(EditAnywhere, Category = "AnimSequence", meta = (GetOptions = "GetAvailableAnimationNames"))
+	TArray<FString> AnimDataSource;
+		
 public:
-	UPaperZDAnimSequence_Spine2D();
 
-	// Needed for animation data initialization
-	void PostLoad() override;
-	
-	//Required methods
-	virtual void BeginSequencePlayback(class UPrimitiveComponent* RenderComponent, bool bLooping, bool bIsPreviewPlayback = false) const override;
-	virtual void UpdateRenderPlayback(class UPrimitiveComponent* RenderComponent, const float Time, bool bIsPreviewPlayback = false) const override;
+	//~ Begin UObject Interface
+	virtual void PostLoad() override;
+	virtual void Serialize(FArchive& Ar) override;
+	//~ End UObject Interface
+
+	//~ Begin UPaperZDAnimSequence Interface
 	virtual float GetTotalDuration() const override;
-	virtual TSubclassOf<UPrimitiveComponent> GetRenderComponentClass() const override;
-	virtual void ConfigureRenderComponent(class UPrimitiveComponent* RenderComponent, bool bIsPreviewPlayback = false) const override;
-	
-#if WITH_EDITOR
-	void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
-#endif
+	virtual float GetFramesPerSecond() const override;
+	virtual bool IsDataSourceEntrySet(int32 EntryIndex) const override;
+	//~ End UPaperZDAnimSequence Interface
 
 private:
-	void UpdateAnimationData();
-	
+	/* Obtain the available animation names stored on the animation source. */
+	UFUNCTION()
+	TArray<FString> GetAvailableAnimationNames() const;
 };

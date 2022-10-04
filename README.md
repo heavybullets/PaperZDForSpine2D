@@ -3,8 +3,9 @@
 This plugin gives support for running Spine2D sequences on PaperZD, must have both plugins installed for this to work.
 
 This plugin contains:
-- An specialized UPaperZDAnimSequence_Spine2D that interfaces with Spine2D and knows how to updates its playback.
-- A ready to use APaperZDCharacter_Spine2D that pre-configures PaperZD's AnimPlayer, registering the Spine2D sequences to the intended RenderComponent.
+- An specialized AnimationSource and AnimSequences used to hold the Spine2D render data for use in the PaperZD plugin.
+- Internal "Playback Handles" that interface with the Spine2D plugin and direct it on how to render the PaperZD animations.
+- Support for "Layered" animations which interface with the Spine2D track system.
 
 Install:
 --------
@@ -14,21 +15,23 @@ Path should look like this
 `MyProject/Plugins/PaperZDForSpine2D`
 
 After that, you should be able to run your project and it will prompt a build which you should accept.
-After that you can start freely using this plugin.
+The plugin is now ready to use.
 
-Advanced Instructions:
----------------------
+First setup:
+--------
 
-For use of external animation sources for PaperZD first you need to have an inherited class from UPaperZDAnimSequence, this fork already gives one already configured class.
+After install, you can start creating your first "Animation Source". The plugin will recognize that Spine2D is enabled and will ask whether you want to use Paper2D or Spine2D for this source. 
+When opening the newly created Animation Source you simply need to setup the "Atlas" and "SkeletonDataAsset" spine objects so the Animation source knows which skeleton you which to use.
 
-After creating the class, you must link the AnimSequence class with its render component, so the AnimPlayer (PaperZD class responsible of AnimSequence Playback) knows which child component to use when updating the playback.
+Note: Due to the way Spine2D is coded, if you setup the "Atlas" and "SkeletonDataAsset" in an incorrect manner (they don't match), an error message will trigger from the Spine2D plugin (which can trigger multiple times). If this happens, simply change the assets so they are correctly setup.
 
-For this, APaperZDCharacter inherits from IPaperZDAnimInstanceManager and provides the method ConfigurePlayer, which handles the created AnimInstance's player and expects the user to configure it.
+Limitations:
+--------
 
-In order to link Render+Sequence you must call:
+Because this plugin connects PaperZD with Spine2D, some compatibility issues might arise as the Spine2D plugin might work in a different manner as PaperZD expects and any changes to the codebase could break the compatibility. 
+Some considerations follow:
 
-Player->RegisterRenderComponent(TSubclassOf<UPaperZDAnimInstance>,UPrimitiveComponent*)
-
-This is a BlueprintNativeEvent, so you can implement it on blueprint or in c++. Default implementation links Paper2D Flipbook component to the Flipbook sequences.
-
-**IMPORTANT: This plugin already contains a ready to use APaperZDCharacter_Spine2D class that registers its component**
+- The animation blending only happens with the last animation that ran in the layer.
+- The animation blending updates at the rate of the world, due to how the PaperZD and Spine2D render pipeline differ.
+- While PaperZD allows for negative playback ratio on the AnimSequences, Spine2D does not allow that and some compatibility issues might arise if you attempt that (like blending being reversed).
+- An animation source can only render a single skeleton. Hot swapping skeletons is not currently supported.
