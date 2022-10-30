@@ -5,6 +5,7 @@
 #include "SpineSkeletonAnimationComponent.h"
 #include "PaperZDAnimSequence_Spine2D.h"
 #include "AnimSequences/Players/PaperZDAnimPlayer.h"
+#include "PaperZDAnimationComponent.h"
 
 APaperZDCharacter_Spine2D::APaperZDCharacter_Spine2D() : Super()
 {
@@ -12,5 +13,6 @@ APaperZDCharacter_Spine2D::APaperZDCharacter_Spine2D() : Super()
 	SpineRenderer->SetupAttachment(RootComponent);
 
 	SpineAnimationComponent = CreateDefaultSubobject<USpineSkeletonAnimationComponent>(TEXT("SkeletonAnimation"));
+	GetAnimationComponent()->InitRenderComponent(SpineRenderer);
 }
 
