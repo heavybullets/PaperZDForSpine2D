@@ -17,10 +17,12 @@ class PAPERZDFORSPINE2D_API APaperZDCharacter_Spine2D : public APaperZDCharacter
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, Category = "Spine2D")
+	/* Spine renderer component. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spine2D", meta = (AllowPrivateAccess = "true"))
 	USpineSkeletonRendererComponent* SpineRenderer;
 
-	UPROPERTY(VisibleAnywhere, Category = "Spine2D")
+	/* Skeleton animation component. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spine2D", meta = (AllowPrivateAccess = "true"))
 	USpineSkeletonAnimationComponent* SpineAnimationComponent;
 
 public:
