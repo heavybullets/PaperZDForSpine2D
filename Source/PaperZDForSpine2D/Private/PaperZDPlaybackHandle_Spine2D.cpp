@@ -52,10 +52,13 @@ void UPaperZDPlaybackHandle_Spine2D::UpdateRenderPlayback(UPrimitiveComponent* R
 
 			//Update the skeleton
 			spine::Skeleton* Skeleton = AnimationComponent->GetSkeleton();
+			Skeleton->update(DeltaTime);
 			AnimationComponent->GetAnimationState()->apply(*Skeleton);
 
 #if SPINE_MAJOR_VERSION >= 4 && SPINE_MINOR_VERSION >= 2
+			AnimationComponent->BeforeUpdateWorldTransform.Broadcast(AnimationComponent);
 			Skeleton->updateWorldTransform(spine::Physics::Physics_Update);
+			AnimationComponent->AfterUpdateWorldTransform.Broadcast(AnimationComponent);
 #elif 
 			Skeleton->updateWorldTransform();
 #endif
