@@ -44,7 +44,7 @@ void UPaperZDAnimationSource_Spine2D::InitPlaybackHandle(UPaperZDPlaybackHandle*
 	UPaperZDPlaybackHandle_Spine2D* SpineHandle = Cast<UPaperZDPlaybackHandle_Spine2D>(Handle);
 	if (SpineHandle)
 	{
-		SpineHandle->InitRenderData(Atlas, SkeletonDataAsset);
+		SpineHandle->InitRenderData(Atlas, SkeletonDataAsset, !PreviewSkin.IsEmpty() ? PreviewSkin : "");
 	}
 }
 
@@ -85,4 +85,12 @@ void UPaperZDAnimationSource_Spine2D::InvalidateCache()
 {
 	bSkeletonDataCacheValid = false;
 	CachedSkeletonData = nullptr;
+}
+
+TArray<FString> UPaperZDAnimationSource_Spine2D::GetSkinNames() const
+{
+	if (SkeletonDataAsset) {
+		return SkeletonDataAsset->Skins;
+	}
+	return TArray<FString>();
 }

@@ -26,6 +26,10 @@ class PAPERZDFORSPINE2D_API UPaperZDPlaybackHandle_Spine2D : public UPaperZDPlay
 	UPROPERTY(Transient)
 	USpineSkeletonDataAsset* SkeletonDataAsset;
 
+	/* Preview Skin that will displayed in Animation Source Editor*/
+	UPROPERTY(Transient)
+	FString PreviewSkin;
+
 	/* Cached spine animation component which is used to update the renderer. */
 	UPROPERTY(Transient)
 	USpineSkeletonAnimationComponent* AnimationComponent;
@@ -37,7 +41,7 @@ public:
 	//~ End UPaperZDPlaybackHandle Interface
 
 	/* Setup the required data for spine 2d rendering. */
-	void InitRenderData(USpineAtlasAsset* InAtlas, USpineSkeletonDataAsset* InSkeletonDataAsset);
+	void InitRenderData(USpineAtlasAsset* InAtlas, USpineSkeletonDataAsset* InSkeletonDataAsset, FString InPreviewSkin);
 
 private:
 	

@@ -89,12 +89,17 @@ void UPaperZDPlaybackHandle_Spine2D::ConfigureRenderComponent(UPrimitiveComponen
 			AnimationComponent->Atlas = Atlas;
 			AnimationComponent->SkeletonData = SkeletonDataAsset;
 			AnimationComponent->SetAutoPlay(false);
+			if (!PreviewSkin.IsEmpty())
+			{
+				AnimationComponent->SetSkin(PreviewSkin);	
+			}
 		}
 	}
 }
 
-void UPaperZDPlaybackHandle_Spine2D::InitRenderData(USpineAtlasAsset* InAtlas, USpineSkeletonDataAsset* InSkeletonDataAsset)
+void UPaperZDPlaybackHandle_Spine2D::InitRenderData(USpineAtlasAsset* InAtlas, USpineSkeletonDataAsset* InSkeletonDataAsset, FString InPreviewSkin)
 {
 	Atlas = InAtlas;
 	SkeletonDataAsset = InSkeletonDataAsset;
+	PreviewSkin = InPreviewSkin;
 }
